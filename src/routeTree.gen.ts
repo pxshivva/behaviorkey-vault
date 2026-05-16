@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as EnrollRouteImport } from './routes/enroll'
+import { Route as EncryptRouteImport } from './routes/encrypt'
+import { Route as DemoRouteImport } from './routes/demo'
+import { Route as DecryptRouteImport } from './routes/decrypt'
 import { Route as IndexRouteImport } from './routes/index'
 
+const EnrollRoute = EnrollRouteImport.update({
+  id: '/enroll',
+  path: '/enroll',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EncryptRoute = EncryptRouteImport.update({
+  id: '/encrypt',
+  path: '/encrypt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DecryptRoute = DecryptRouteImport.update({
+  id: '/decrypt',
+  path: '/decrypt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,72 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/decrypt': typeof DecryptRoute
+  '/demo': typeof DemoRoute
+  '/encrypt': typeof EncryptRoute
+  '/enroll': typeof EnrollRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/decrypt': typeof DecryptRoute
+  '/demo': typeof DemoRoute
+  '/encrypt': typeof EncryptRoute
+  '/enroll': typeof EnrollRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/decrypt': typeof DecryptRoute
+  '/demo': typeof DemoRoute
+  '/encrypt': typeof EncryptRoute
+  '/enroll': typeof EnrollRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/decrypt' | '/demo' | '/encrypt' | '/enroll'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/decrypt' | '/demo' | '/encrypt' | '/enroll'
+  id: '__root__' | '/' | '/decrypt' | '/demo' | '/encrypt' | '/enroll'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DecryptRoute: typeof DecryptRoute
+  DemoRoute: typeof DemoRoute
+  EncryptRoute: typeof EncryptRoute
+  EnrollRoute: typeof EnrollRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/enroll': {
+      id: '/enroll'
+      path: '/enroll'
+      fullPath: '/enroll'
+      preLoaderRoute: typeof EnrollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/encrypt': {
+      id: '/encrypt'
+      path: '/encrypt'
+      fullPath: '/encrypt'
+      preLoaderRoute: typeof EncryptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/decrypt': {
+      id: '/decrypt'
+      path: '/decrypt'
+      fullPath: '/decrypt'
+      preLoaderRoute: typeof DecryptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +121,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DecryptRoute: DecryptRoute,
+  DemoRoute: DemoRoute,
+  EncryptRoute: EncryptRoute,
+  EnrollRoute: EnrollRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
