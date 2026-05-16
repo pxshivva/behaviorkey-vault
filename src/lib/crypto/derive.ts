@@ -25,7 +25,7 @@ export async function deriveAesAndHmac(
   combinedSalt.set(new TextEncoder().encode("aadi-v1.0"), salt.length);
 
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: combinedSalt, iterations: PBKDF2_ITERS, hash: "SHA-256" },
+    { name: "PBKDF2", salt: combinedSalt as BufferSource, iterations: PBKDF2_ITERS, hash: "SHA-256" },
     base,
     512,
   );

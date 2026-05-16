@@ -38,7 +38,7 @@ export async function writeAadi(opts: {
   name: string;
   isFile: boolean;
 }): Promise<Uint8Array> {
-  const ctBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv: opts.iv }, opts.aesKey, opts.plaintext);
+  const ctBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv: opts.iv as BufferSource }, opts.aesKey, opts.plaintext as BufferSource);
   const ct = new Uint8Array(ctBuf);
   const nameBytes = new TextEncoder().encode(opts.name);
   const headerSize = 40 + nameBytes.length + 8;
@@ -102,13 +102,13 @@ export async function readAadi(
 ): Promise<{ header: AadiHeader; plaintext: Uint8Array }> {
   const h = parseHeader(buf);
   const mac = buf.subarray(h.macStart);
-  const ok = await crypto.subtle.verify("HMAC", hmacKey, mac, buf.subarray(0, h.macStart));
+  const ok = await crypto.subtle.verify("HMAC", hmacKey, mac as BufferSource, buf.subarray(0, h.macStart) as BufferSource);
   if (!ok) throw new AadiError("HmacMismatch", "HMAC verification failed");
   try {
     const pt = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: h.iv },
+      { name: "AES-GCM", iv: h.iv as BufferSource },
       aesKey,
-      buf.subarray(h.ciphertextStart, h.ciphertextEnd),
+      buf.subarray(h.ciphertextStart, h.ciphertextEnd) as BufferSource,
     );
     return { header: h, plaintext: new Uint8Array(pt) };
   } catch {
