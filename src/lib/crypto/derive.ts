@@ -5,7 +5,7 @@ const PBKDF2_ITERS = 200_000;
 
 export async function deriveSeed(features: FeatureVector): Promise<ArrayBuffer> {
   const q = quantize(features);
-  return await crypto.subtle.digest("SHA-256", q);
+  return await crypto.subtle.digest("SHA-256", q as BufferSource);
 }
 
 async function importPbkdf2Base(seed: ArrayBuffer) {
