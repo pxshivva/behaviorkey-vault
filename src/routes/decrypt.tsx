@@ -151,6 +151,14 @@ function DecryptPage() {
           )}
         </div>
       )}
+
+      {mismatch && !revealed && (
+        <ToleranceReport
+          sample={mismatch.sample}
+          template={mismatch.template}
+          onRetry={() => setMismatch(null)}
+        />
+      )}
     </div>
   );
 }
