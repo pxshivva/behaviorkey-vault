@@ -138,6 +138,28 @@ export function ToleranceReport({
         ))}
       </div>
 
+      <div className="rounded-md border bg-card/60 overflow-hidden">
+        <button
+          onClick={() => setJsonOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-muted/40 transition-colors"
+          aria-expanded={jsonOpen}
+        >
+          <span className="flex items-center gap-2">
+            <Braces className="h-3.5 w-3.5 text-accent" />
+            Inspect report JSON
+            <span className="font-mono text-muted-foreground">
+              ({Object.keys(report).length} keys · {report.features.length} features)
+            </span>
+          </span>
+          <ChevronDown className={cn("h-4 w-4 transition-transform", jsonOpen && "rotate-180")} />
+        </button>
+        {jsonOpen && (
+          <pre className="hex-dump bg-background/60 border-t text-[11px] leading-relaxed p-3 max-h-80 overflow-auto font-mono">
+            <PrettyJson value={report} />
+          </pre>
+        )}
+      </div>
+
       <div className="text-xs text-muted-foreground border-t border-border/50 pt-3">
         Tip: Each feature is quantized into buckets of width {BUCKET}. Sample and template must land in the
         same (or adjacent) bucket. Re-sample with the same posture, hand position, and rhythm as enrollment.
