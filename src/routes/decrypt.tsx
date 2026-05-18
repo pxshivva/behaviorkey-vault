@@ -27,6 +27,7 @@ function DecryptPage() {
   const [header, setHeader] = useState<AadiHeader | null>(null);
   const [working, setWorking] = useState(false);
   const [revealed, setRevealed] = useState<{ name: string; isFile: boolean; bytes: Uint8Array } | null>(null);
+  const [mismatch, setMismatch] = useState<{ sample: FeatureVector; template: FeatureVector } | null>(null);
 
   useEffect(() => { setEnrolled(!!loadEnrollment()); }, []);
 
