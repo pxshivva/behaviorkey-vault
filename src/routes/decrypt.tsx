@@ -8,6 +8,8 @@ import { deriveAesAndHmac } from "@/lib/crypto/derive";
 import { loadEnrollment, unb64 } from "@/lib/storage";
 import { toast } from "sonner";
 import { Loader2, FileUp, Download, Eye } from "lucide-react";
+import { ToleranceReport } from "@/components/ToleranceReport";
+import type { FeatureVector } from "@/lib/behavior/features";
 
 export const Route = createFileRoute("/decrypt")({
   head: () => ({
