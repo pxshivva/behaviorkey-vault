@@ -8,6 +8,8 @@ import { deriveAesAndHmac } from "@/lib/crypto/derive";
 import { loadEnrollment, unb64 } from "@/lib/storage";
 import { toast } from "sonner";
 import { Loader2, FileUp, Download, Eye } from "lucide-react";
+import { ToleranceReport } from "@/components/ToleranceReport";
+import type { FeatureVector } from "@/lib/behavior/features";
 
 export const Route = createFileRoute("/decrypt")({
   head: () => ({
@@ -25,6 +27,7 @@ function DecryptPage() {
   const [header, setHeader] = useState<AadiHeader | null>(null);
   const [working, setWorking] = useState(false);
   const [revealed, setRevealed] = useState<{ name: string; isFile: boolean; bytes: Uint8Array } | null>(null);
+  const [mismatch, setMismatch] = useState<{ sample: FeatureVector; template: FeatureVector } | null>(null);
 
   useEffect(() => { setEnrolled(!!loadEnrollment()); }, []);
 
@@ -52,20 +55,23 @@ function DecryptPage() {
     const enr = loadEnrollment();
     if (!enr) return;
     setWorking(true);
+    setMismatch(null);
+    const liveFeatures = extractFeatures(raw);
     try {
-      // Use the live template for deriving the key — quantization gives tolerance.
-      const liveFeatures = extractFeatures(raw);
-      void liveFeatures;
-      const { aesKey, hmacKey } = await deriveAesAndHmac(enr.template, header.salt);
+      // Derive the key from LIVE features — quantization (±15%) provides tolerance.
+      const { aesKey, hmacKey } = await deriveAesAndHmac(liveFeatures, header.salt);
       const { plaintext } = await readAadi(buf, aesKey, hmacKey);
       setRevealed({ name: header.name, isFile: header.isFile, bytes: plaintext });
       toast.success("Decrypted", { description: `${plaintext.length} bytes recovered` });
     } catch (e) {
       const err = e as AadiError | Error;
       const code = (err as AadiError).code;
-      if (code === "HmacMismatch") toast.error("HMAC mismatch", { description: "File was tampered with, or the derived key is wrong." });
-      else if (code === "DecryptFailed") toast.error("Decryption failed", { description: "Behavior didn't match closely enough. Relax and try again." });
-      else toast.error("Failed", { description: err.message });
+      if (code === "HmacMismatch" || code === "DecryptFailed") {
+        setMismatch({ sample: liveFeatures, template: enr.template });
+        toast.error("Behavior mismatch", { description: "See per-feature breakdown below." });
+      } else {
+        toast.error("Failed", { description: err.message });
+      }
     } finally {
       setWorking(false);
     }
@@ -144,6 +150,14 @@ function DecryptPage() {
             </pre>
           )}
         </div>
+      )}
+
+      {mismatch && !revealed && (
+        <ToleranceReport
+          sample={mismatch.sample}
+          template={mismatch.template}
+          onRetry={() => setMismatch(null)}
+        />
       )}
     </div>
   );
