@@ -1,6 +1,8 @@
 import { FEATURE_KEYS, type FeatureVector, type FeatureKey } from "@/lib/behavior/features";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Check, X } from "lucide-react";
+import { AlertTriangle, Check, X, Copy, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const BUCKET = 0.15;
 const TOL = 0.15;
@@ -62,6 +64,51 @@ export function ToleranceReport({
   const passed = deltas.length - failed.length;
   const matchPct = Math.round((passed / deltas.length) * 100);
 
+  const report = {
+    schema: "behaviorkey-vault.tolerance-report/v1",
+    generatedAt: new Date().toISOString(),
+    tolerance: TOL,
+    bucketWidth: BUCKET,
+    requiredMatchRatio: 0.7,
+    overall: {
+      featuresTotal: deltas.length,
+      featuresPassed: passed,
+      featuresFailed: failed.length,
+      matchPct,
+      decision: matchPct >= 70 ? "pass" : "fail",
+    },
+    features: deltas.map((d) => ({
+      key: d.key,
+      label: d.label,
+      sample: Number(d.sample.toFixed(6)),
+      template: Number(d.template.toFixed(6)),
+      delta: Number(d.delta.toFixed(6)),
+      pctOfTolerance: Number(d.pctOfTol.toFixed(4)),
+      sampleBucket: d.sampleBucket,
+      templateBucket: d.templateBucket,
+      passed: d.passed,
+    })),
+  };
+  const json = JSON.stringify(report, null, 2);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(json);
+      toast.success("Copied breakdown to clipboard");
+    } catch {
+      toast.error("Clipboard unavailable");
+    }
+  }
+  function download() {
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tolerance-report-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-5 space-y-4">
       <div className="flex items-start gap-3">
@@ -72,6 +119,14 @@ export function ToleranceReport({
             {failed.length} of {deltas.length} features fell outside the ±15% tolerance.
             Overall match: <span className="font-mono text-foreground">{matchPct}%</span> (need ≥70%).
           </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button size="sm" variant="outline" onClick={copy}>
+            <Copy className="mr-1 h-3.5 w-3.5" /> Copy JSON
+          </Button>
+          <Button size="sm" variant="outline" onClick={download}>
+            <Download className="mr-1 h-3.5 w-3.5" /> Download
+          </Button>
         </div>
       </div>
 
