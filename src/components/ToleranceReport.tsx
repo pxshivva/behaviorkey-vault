@@ -1,6 +1,8 @@
 import { FEATURE_KEYS, type FeatureVector, type FeatureKey } from "@/lib/behavior/features";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Check, X } from "lucide-react";
+import { AlertTriangle, Check, X, Copy, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const BUCKET = 0.15;
 const TOL = 0.15;
