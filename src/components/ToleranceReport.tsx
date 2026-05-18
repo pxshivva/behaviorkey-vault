@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { FEATURE_KEYS, type FeatureVector, type FeatureKey } from "@/lib/behavior/features";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Check, X, Copy, Download } from "lucide-react";
+import { AlertTriangle, Check, X, Copy, Download, ChevronDown, Braces } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
