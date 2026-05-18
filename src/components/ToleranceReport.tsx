@@ -60,6 +60,7 @@ export function ToleranceReport({
   template: FeatureVector;
   onRetry?: () => void;
 }) {
+  const [jsonOpen, setJsonOpen] = useState(false);
   const deltas = computeDeltas(sample, template);
   const failed = deltas.filter((d) => !d.passed);
   const passed = deltas.length - failed.length;
