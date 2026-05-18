@@ -233,3 +233,34 @@ function DeltaRow({ d }: { d: FeatureDelta }) {
     </div>
   );
 }
+
+function PrettyJson({ value }: { value: unknown }) {
+  const text = JSON.stringify(value, null, 2);
+  // Tokenize: strings (incl. keys), numbers, booleans/null, braces/brackets, punctuation.
+  const re = /("(?:\\.|[^"\\])*"\s*:?)|(\b-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|(\btrue\b|\bfalse\b|\bnull\b)|([{}\[\],])/g;
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text))) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    const [tok, str, num, lit, punc] = m;
+    if (str) {
+      const isKey = tok.trimEnd().endsWith(":");
+      parts.push(
+        <span key={i++} className={isKey ? "text-accent" : "text-primary"}>
+          {tok}
+        </span>,
+      );
+    } else if (num) {
+      parts.push(<span key={i++} className="text-[oklch(0.78_0.16_60)]">{num}</span>);
+    } else if (lit) {
+      parts.push(<span key={i++} className="text-destructive">{lit}</span>);
+    } else if (punc) {
+      parts.push(<span key={i++} className="text-muted-foreground">{punc}</span>);
+    }
+    last = m.index + tok.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return <code>{parts}</code>;
+}
